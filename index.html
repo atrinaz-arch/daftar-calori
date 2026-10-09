@@ -1,0 +1,1159 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#2e7d32">
+<title>دفتر کالری</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+  --green:#2e7d32;--green-d:#1b5e20;--green-l:#e8f5e9;
+  --orange:#ef6c00;--orange-d:#e65100;--orange-l:#fff3e0;
+  --bg:#fffaf5;--card:#ffffff;--txt:#3e2723;--mut:#8d6e63;--line:#f0e2d4;
+  --red:#d32f2f;--blue:#1565c0;--shadow:0 2px 10px rgba(62,39,35,.08);
+}
+html{font-size:16px}
+body{font-family:system-ui,'Segoe UI',Tahoma,Arial,sans-serif;background:var(--bg);color:var(--txt);
+  max-width:600px;margin:0 auto;min-height:100vh;padding-bottom:84px;line-height:1.7}
+.appbar{background:linear-gradient(135deg,var(--green-d),var(--green));color:#fff;padding:14px 16px;
+  position:sticky;top:0;z-index:20;box-shadow:var(--shadow)}
+.appbar h1{font-size:1.25rem;font-weight:800}
+.appbar .sub{font-size:.8rem;opacity:.9}
+main{padding:12px 12px 0}
+.view.hidden{display:none}
+.card{background:var(--card);border-radius:16px;padding:14px;margin-bottom:12px;box-shadow:var(--shadow);border:1px solid var(--line)}
+.card h2{font-size:1.02rem;margin-bottom:8px;color:var(--green-d)}
+.row{display:flex;align-items:center;gap:8px}
+.row.between{justify-content:space-between}
+.btn{border:none;border-radius:12px;padding:12px 18px;font-size:1rem;font-family:inherit;cursor:pointer;
+  background:#eee;color:var(--txt);min-height:48px;font-weight:700}
+.btn:active{transform:scale(.97)}
+.btn-primary{background:var(--green);color:#fff}
+.btn-orange{background:var(--orange);color:#fff}
+.btn-danger{background:var(--red);color:#fff}
+.btn-ghost{background:var(--green-l);color:var(--green-d)}
+.btn-block{width:100%;display:block;text-align:center}
+.btn-sm{padding:8px 12px;min-height:40px;font-size:.9rem}
+input,select,textarea{font-family:inherit;font-size:1rem;padding:11px 12px;border:1.5px solid var(--line);
+  border-radius:12px;width:100%;background:#fff;color:var(--txt)}
+input:focus,select:focus{outline:none;border-color:var(--green)}
+label{display:block;font-size:.9rem;color:var(--mut);margin:10px 0 4px;font-weight:700}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.tabbar{position:fixed;bottom:0;right:0;left:0;max-width:600px;margin:0 auto;background:#fff;border-top:1px solid var(--line);
+  display:flex;z-index:30;padding-bottom:env(safe-area-inset-bottom)}
+.tabbar button{flex:1;border:none;background:none;font-family:inherit;font-size:.72rem;color:var(--mut);
+  padding:8px 2px 10px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px;min-height:64px}
+.tabbar button .ic{font-size:1.35rem;line-height:1}
+.tabbar button.active{color:var(--green);font-weight:800}
+.badge{display:inline-block;font-size:.7rem;background:var(--orange-l);color:var(--orange-d);border-radius:8px;
+  padding:1px 8px;margin-right:6px;font-weight:700}
+.badge.green{background:var(--green-l);color:var(--green-d)}
+.food-item{display:flex;justify-content:space-between;align-items:center;padding:11px 4px;border-bottom:1px solid var(--line);cursor:pointer;min-height:56px}
+.food-item:last-child{border-bottom:none}
+.food-item .nm{font-weight:700}
+.food-item .meta{font-size:.78rem;color:var(--mut)}
+.meal-head{display:flex;justify-content:space-between;align-items:center;margin:6px 0}
+.meal-head h3{font-size:.95rem;color:var(--orange-d)}
+.meal-head .kcal{font-size:.8rem;color:var(--mut)}
+.entry{display:flex;justify-content:space-between;align-items:center;padding:9px 4px;border-bottom:1px dashed var(--line);font-size:.92rem}
+.entry .del{color:var(--red);background:none;border:none;font-size:1.2rem;cursor:pointer;padding:6px 10px}
+.entry .edit{color:var(--blue);background:none;border:none;font-size:1rem;cursor:pointer;padding:6px 8px}
+.ring-wrap{display:flex;align-items:center;gap:14px}
+.ring{transform:rotate(-90deg)}
+.ring .bg{stroke:var(--line)}
+.ring .fg{stroke:var(--green);stroke-linecap:round;transition:stroke-dashoffset .4s}
+.bars{margin-top:10px}
+.bar-row{display:flex;align-items:center;gap:8px;font-size:.8rem;margin:5px 0}
+.bar-row .lbl{width:52px;color:var(--mut)}
+.bar{flex:1;height:10px;background:var(--line);border-radius:6px;overflow:hidden}
+.bar i{display:block;height:100%;border-radius:6px;background:var(--orange)}
+.bar i.p{background:#66bb6a}.bar i.c{background:#ffa726}.bar i.f{background:#ef5350}.bar i.fb{background:#8d6e63}
+.bar-row .val{width:86px;text-align:left;font-size:.75rem;color:var(--mut)}
+.date-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.date-nav button{background:var(--green-l);border:none;color:var(--green-d);font-size:1.3rem;width:48px;height:48px;border-radius:14px;cursor:pointer;font-family:inherit}
+.date-nav .d{font-weight:800;text-align:center}
+.date-nav .d small{display:block;font-weight:400;color:var(--mut);font-size:.75rem}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:50;display:flex;align-items:flex-end;justify-content:center}
+.modal.hidden{display:none}
+.sheet{background:#fff;width:100%;max-width:600px;max-height:88vh;overflow-y:auto;border-radius:20px 20px 0 0;padding:16px 16px 24px}
+.sheet h2{margin-bottom:10px;color:var(--green-d)}
+.unit-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:10px 0}
+.unit-btn{border:2px solid var(--line);background:#fff;border-radius:12px;padding:12px;font-family:inherit;font-size:.92rem;cursor:pointer;min-height:52px}
+.unit-btn.sel{border-color:var(--green);background:var(--green-l);font-weight:800;color:var(--green-d)}
+.mic-btn{width:56px;height:56px;border-radius:50%;border:none;background:var(--orange);color:#fff;font-size:1.5rem;cursor:pointer;flex-shrink:0}
+.mic-btn.listening{background:var(--red);animation:pulse 1s infinite}
+@keyframes pulse{50%{transform:scale(1.1)}}
+.confirm-card{border:2px solid var(--green);border-radius:14px;padding:12px;background:var(--green-l);margin-top:10px}
+.ex-item{display:flex;align-items:center;gap:8px;padding:9px 4px;border-bottom:1px solid var(--line);font-size:.9rem}
+.ex-item input{width:76px;padding:8px}
+canvas.chart{width:100%;height:220px;background:#fff;border:1px solid var(--line);border-radius:14px}
+.set-row{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:10px 0;border-bottom:1px solid var(--line)}
+.set-row input{width:90px;text-align:center}
+.empty{text-align:center;color:var(--mut);padding:18px 6px;font-size:.9rem}
+.chip{display:inline-block;background:var(--green-l);color:var(--green-d);border-radius:20px;padding:4px 12px;font-size:.8rem;margin:2px;font-weight:700}
+.kv{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px dashed var(--line);font-size:.92rem}
+.kv:last-child{border:none}
+.wizard{position:fixed;inset:0;background:var(--bg);z-index:60;overflow-y:auto;padding:20px 16px}
+.wizard.hidden{display:none}
+.wizard h2{color:var(--green-d);margin-bottom:6px}
+.seg{display:flex;gap:8px;margin:6px 0 2px}
+.seg button{flex:1;border:2px solid var(--line);background:#fff;border-radius:12px;padding:10px;font-family:inherit;cursor:pointer;min-height:48px}
+.seg button.sel{border-color:var(--green);background:var(--green-l);font-weight:800;color:var(--green-d)}
+.note{font-size:.78rem;color:var(--mut);margin-top:8px}
+.toast{position:fixed;bottom:90px;right:50%;transform:translateX(50%);background:#323232;color:#fff;
+  padding:10px 20px;border-radius:24px;font-size:.9rem;z-index:99;opacity:0;transition:opacity .3s;pointer-events:none;white-space:nowrap}
+.toast.show{opacity:1}
+</style>
+</head>
+<body>
+<header class="appbar">
+  <h1>🥗 دفتر کالری</h1>
+  <div class="sub">دفترچه تغذیه و کالری فارسی</div>
+</header>
+
+<main>
+  <!-- ===== DIARY ===== -->
+  <section id="view-diary" class="view">
+    <div class="date-nav card" style="margin-bottom:12px">
+      <button id="datePrev" aria-label="روز قبل">‹</button>
+      <div class="d"><span id="dateTitle">امروز</span><small id="dateSub"></small></div>
+      <button id="dateNext" aria-label="روز بعد">›</button>
+    </div>
+
+    <div class="card">
+      <div class="ring-wrap">
+        <svg class="ring" width="110" height="110" viewBox="0 0 110 110">
+          <circle class="bg" cx="55" cy="55" r="46" fill="none" stroke-width="12"/>
+          <circle class="fg" id="ringFg" cx="55" cy="55" r="46" fill="none" stroke-width="12"
+            stroke-dasharray="289" stroke-dashoffset="289"/>
+          <text x="55" y="52" text-anchor="middle" font-size="20" font-weight="bold" fill="#3e2723" id="ringEaten">۰</text>
+          <text x="55" y="72" text-anchor="middle" font-size="11" fill="#8d6e63">از <tspan id="ringTarget">۰</tspan></text>
+        </svg>
+        <div style="flex:1">
+          <div class="kv"><span>🎯 هدف روزانه</span><b id="sumTarget">۰</b></div>
+          <div class="kv"><span>🔥 سوزانده (پایه+ورزش)</span><b id="sumBurn">۰</b></div>
+          <div class="kv"><span>⚖️ خالص (خورده−سوزانده)</span><b id="sumNet">۰</b></div>
+        </div>
+      </div>
+      <div class="bars">
+        <div class="bar-row"><span class="lbl">پروتئین</span><div class="bar"><i class="p" id="barP"></i></div><span class="val" id="valP"></span></div>
+        <div class="bar-row"><span class="lbl">کربوهیدرات</span><div class="bar"><i class="c" id="barC"></i></div><span class="val" id="valC"></span></div>
+        <div class="bar-row"><span class="lbl">چربی</span><div class="bar"><i class="f" id="barF"></i></div><span class="val" id="valF"></span></div>
+        <div class="bar-row"><span class="lbl">فیبر</span><div class="bar"><i class="fb" id="barFib"></i></div><span class="val" id="valFib"></span></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>🎙️ ثبت هوشمند</h2>
+      <div class="row">
+        <input id="smartInput" placeholder="مثلاً: سه قاشق عدس‌پلو برای ناهار" enterkeyhint="go">
+        <button class="mic-btn" id="micBtn" aria-label="ثبت صوتی">🎤</button>
+      </div>
+      <button class="btn btn-orange btn-block" id="smartParse" style="margin-top:10px">تحلیل و ثبت</button>
+      <div id="smartResult"></div>
+      <div class="note">می‌توانی بنویسی یا بگویی؛ مثلاً «۲۰۰ گرم جوجه‌کباب شام» — همیشه قبل از ثبت برای تأیید نشان داده می‌شود.</div>
+    </div>
+
+    <div id="meals"></div>
+  </section>
+
+  <!-- ===== FOODS ===== -->
+  <section id="view-foods" class="view hidden">
+    <div class="card">
+      <h2>🍲 دیتابیس غذاها <span class="badge green" id="foodCount"></span></h2>
+      <input id="foodSearch" placeholder="جست‌وجوی غذا… مثلاً قورمه">
+      <div id="foodList"></div>
+    </div>
+    <div class="card">
+      <h2>➕ غذای من</h2>
+      <div class="row">
+        <button class="btn btn-ghost btn-block" id="btnCustomFood">غذای دستی</button>
+        <button class="btn btn-ghost btn-block" id="btnRecipe">ساخت دستورپخت</button>
+      </div>
+      <div id="myFoods"></div>
+    </div>
+  </section>
+
+  <!-- ===== EXERCISE ===== -->
+  <section id="view-exercise" class="view hidden">
+    <div class="card">
+      <h2>🏃 ثبت ورزش <small style="color:var(--mut);font-weight:400" id="exDate"></small></h2>
+      <div class="note" style="margin:0 0 8px">کالری‌سوزی = MET × وزن × ساعت</div>
+      <div id="exCatalog"></div>
+    </div>
+    <div class="card">
+      <h2>ورزش‌های ثبت‌شده</h2>
+      <div id="exLog"></div>
+      <div class="kv" style="margin-top:8px"><span>مجموع سوزانده از ورزش</span><b id="exTotal">۰ کالری</b></div>
+    </div>
+  </section>
+
+  <!-- ===== WEIGHT ===== -->
+  <section id="view-weight" class="view hidden">
+    <div class="card">
+      <h2>⚖️ ثبت وزن</h2>
+      <div class="row">
+        <input id="weightInput" type="number" inputmode="decimal" step="0.1" placeholder="وزن (کیلوگرم)">
+        <button class="btn btn-primary" id="weightAdd">ثبت</button>
+      </div>
+      <div id="weightLog" style="margin-top:8px"></div>
+    </div>
+    <div class="card">
+      <h2>📈 روند وزن</h2>
+      <canvas class="chart" id="weightChart" width="560" height="220"></canvas>
+    </div>
+    <div class="card">
+      <h2>میانگین خالص هفتگی</h2>
+      <div class="kv"><span>میانگین کالری خالص ۷ روز اخیر</span><b id="weekAvg">۰</b></div>
+      <div class="note">خالص = خورده − (متابولیسم پایه روزانه + ورزش)</div>
+    </div>
+  </section>
+
+  <!-- ===== SETTINGS ===== -->
+  <section id="view-settings" class="view hidden">
+    <div class="card">
+      <h2>👤 پروفایل</h2>
+      <div id="profileForm"></div>
+      <button class="btn btn-primary btn-block" id="profileSave" style="margin-top:12px">ذخیره پروفایل</button>
+      <div id="profileInfo" style="margin-top:10px"></div>
+    </div>
+    <div class="card">
+      <h2>🥄 معادل گرمی واحدها</h2>
+      <div id="unitEditor"></div>
+    </div>
+    <div class="card">
+      <h2>💾 پشتیبان‌گیری</h2>
+      <div class="row">
+        <button class="btn btn-ghost btn-block" id="btnExport">خروجی JSON</button>
+        <button class="btn btn-ghost btn-block" id="btnImport">ورودی JSON</button>
+      </div>
+      <input type="file" id="importFile" accept=".json,application/json" style="display:none">
+      <button class="btn btn-danger btn-block" id="btnClear" style="margin-top:10px">پاک کردن همه داده‌ها</button>
+    </div>
+    <div class="card">
+      <div class="note">دفتر کالری — نسخه آفلاین مستقل. همه داده‌ها فقط روی همین دستگاه ذخیره می‌شود.<br>مقادیر غذاهای سنتی تخمینی است (دستورپخت هر خانه فرق می‌کند).</div>
+    </div>
+  </section>
+</main>
+
+<nav class="tabbar">
+  <button data-v="diary" class="active"><span class="ic">📓</span>دفترچه</button>
+  <button data-v="foods"><span class="ic">🍲</span>غذا</button>
+  <button data-v="exercise"><span class="ic">🏃</span>ورزش</button>
+  <button data-v="weight"><span class="ic">⚖️</span>وزن</button>
+  <button data-v="settings"><span class="ic">⚙️</span>تنظیمات</button>
+</nav>
+
+<div class="modal hidden" id="modal"><div class="sheet" id="sheet"></div></div>
+<div class="toast" id="toast"></div>
+
+<script>
+'use strict';
+/* ============================================================
+   دفتر کالری — نسخه مستقل آفلاین (vanilla JS, localStorage)
+   ============================================================ */
+
+// ---------- utilities ----------
+const $ = (s) => document.querySelector(s);
+const $$ = (s) => Array.from(document.querySelectorAll(s));
+const FA_D = '۰۱۲۳۴۵۶۷۸۹';
+const faNum = (n) => String(n).replace(/[0-9]/g, (d) => FA_D[+d]).replace(/\./g, '٫');
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const round1 = (n) => Math.round(n * 10) / 10;
+
+function toast(msg) {
+  const t = $('#toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(t._h);
+  t._h = setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+// ---------- storage (dc_ prefix) ----------
+const store = {
+  get(k, def) {
+    try { const v = localStorage.getItem('dc_' + k); return v == null ? def : JSON.parse(v); }
+    catch (e) { return def; }
+  },
+  set(k, v) { localStorage.setItem('dc_' + k, JSON.stringify(v)); },
+  del(k) { localStorage.removeItem('dc_' + k); }
+};
+
+// ---------- dates ----------
+const dstr = (d) => d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+const todayStr = () => dstr(new Date());
+const parseD = (s) => { const p = s.split('-').map(Number); return new Date(p[0], p[1] - 1, p[2]); };
+const shiftD = (s, n) => { const d = parseD(s); d.setDate(d.getDate() + n); return dstr(d); };
+const WEEKDAYS = ['یکشنبه','دوشنبه','سه‌شنبه','چهارشنبه','پنجشنبه','جمعه','شنبه'];
+const faDate = (s) => { const d = parseD(s); return faNum(d.getFullYear() + '/' + (d.getMonth()+1) + '/' + d.getDate()) + ' — ' + WEEKDAYS[d.getDay()]; };
+
+// ---------- constants ----------
+const MEALS = [
+  { id: 'breakfast', name: 'صبحانه', icon: '🌅' },
+  { id: 'lunch',     name: 'ناهار',   icon: '☀️' },
+  { id: 'dinner',    name: 'شام',     icon: '🌙' },
+  { id: 'snack',     name: 'میان‌وعده', icon: '🍎' }
+];
+const mealName = (id) => (MEALS.find((m) => m.id === id) || {}).name || id;
+const ACTS = [
+  { id: 'low',      name: 'کم‌تحرک', f: 1.2 },
+  { id: 'light',    name: 'کم',      f: 1.375 },
+  { id: 'moderate', name: 'متوسط',   f: 1.55 },
+  { id: 'high',     name: 'زیاد',    f: 1.725 }
+];
+const actName = (id) => (ACTS.find((a) => a.id === id) || {}).name || id;
+const GOALS = [
+  { id: 'lose', name: 'کاهش وزن', adj: -300 },
+  { id: 'maintain', name: 'تثبیت وزن', adj: 0 },
+  { id: 'gain', name: 'افزایش وزن', adj: 300 }
+];
+const UNITS = [
+  { id: 'g',     name: 'گرم',            def: 1 },
+  { id: 'tbsp',  name: 'قاشق غذاخوری',  def: 20 },
+  { id: 'tsp',   name: 'قاشق چای‌خوری', def: 5 },
+  { id: 'ladle', name: 'کفگیر',         def: 120 },
+  { id: 'cup',   name: 'پیمانه',        def: 200 },
+  { id: 'glass', name: 'لیوان',         def: 240 },
+  { id: 'bowl',  name: 'کاسه',          def: 250 },
+  { id: 'piece', name: 'عدد',           def: 0 },
+  { id: 'slice', name: 'برش',           def: 0 }
+];
+const unitName = (id) => (UNITS.find((u) => u.id === id) || {}).name || id;
+function getUnits() {
+  const saved = store.get('units', {});
+  const out = {};
+  UNITS.forEach((u) => { out[u.id] = saved[u.id] != null ? +saved[u.id] : u.def; });
+  return out;
+}
+const EXERCISES = [
+  { name: 'پیاده‌روی آرام', met: 3.3 }, { name: 'پیاده‌روی تند', met: 4.3 },
+  { name: 'دویدن', met: 8 }, { name: 'شنا', met: 6 },
+  { name: 'دوچرخه‌سواری', met: 7 }, { name: 'فوتبال', met: 7 },
+  { name: 'والیبال', met: 4 }, { name: 'بدنسازی', met: 5 },
+  { name: 'یوگا', met: 3 }, { name: 'رقص', met: 4.5 },
+  { name: 'کار خانه', met: 3.5 }, { name: 'باغبانی', met: 4 }
+];
+
+// ---------- food database (per 100g; est:true = مقادیر تخمینی) ----------
+// [id, name, kcal, protein, carbs, fat, fiber, est?, piece_g?, slice_g?]
+const FOOD_ROWS = [
+  ['f01','قورمه‌سبزی',110,7,6,7,3,1],['f02','فسنجون',165,5,8,13,2,1],
+  ['f03','قیمه',120,7,9,6,3,1],['f04','خورش کرفس',95,6,7,5,3,1],
+  ['f05','خورش بادمجان',105,5,8,6,3,1],['f06','زرشک‌پلو با مرغ',165,10,20,5,1.5,1],
+  ['f07','ته‌چین مرغ',190,9,20,8,1,1],['f08','عدس‌پلو',145,6,24,3,4,1],
+  ['f09','باقالی‌پلو',150,6,24,3.5,4,1],['f10','لوبیاپلو',135,6,22,3,4,1],
+  ['f11','سبزی‌پلو با ماهی',160,10,19,5,2,1],['f12','چلو (برنج پخته)',130,2.5,28,0.3,0.5],
+  ['f13','کته',135,2.5,29,0.4,0.5],['f14','برنج خام (خشک)',360,7,80,0.6,1.5],
+  ['f15','آش رشته',90,4,13,2.5,3,1],['f16','آش جو',75,3,11,2,2.5,1],
+  ['f17','سوپ جو',60,2.5,9,1.5,2],['f18','آبگوشت (دیزی)',110,8,8,5,3,1],
+  ['f19','حلیم',120,7,15,3.5,2,1],['f20','کشک بادمجان',95,4,7,6,3,1],
+  ['f21','میرزاقاسمی',80,3,6,5,2.5,1],['f22','سالاد فصل',25,1,5,0.2,1.5],
+  ['f23','کوکوسبزی',160,6,6,13,2.5,1],['f24','کوکو سیب‌زمینی',170,4,18,9,2,1],
+  ['f25','کتلت',200,10,10,13,1.5,1],['f26','شامی',190,11,8,12,1.5,1],
+  ['f27','فلافل',220,8,14,15,4,1,15],['f28','سمبوسه',210,6,20,12,2,1,80],
+  ['f29','پیراشکی',230,7,22,12,1.5,0,90],['f30','جوجه‌کباب',165,24,1,6,0,1],
+  ['f31','کباب کوبیده',220,18,2,16,0,1],['f32','مرغ سرخ‌شده',210,22,3,12,0],
+  ['f33','ماهی سرخ‌شده',190,20,2,11,0],['f34','کله‌پاچه',150,12,1,11,0],
+  ['f35','تخم‌مرغ آب‌پز',155,13,1,11,0,0,50],['f36','نان بربری',265,9,55,1.5,3,0,100],
+  ['f37','نان سنگک',260,9,54,1.5,4,0,90],['f38','نان لواش',270,9,56,1.2,2.5,0,40],
+  ['f39','نان تافتون',265,9,55,1.3,3,0,70],['f40','شیر',60,3.2,4.8,3.5,0],
+  ['f41','ماست',60,3.5,4.5,3.3,0],['f42','ماست چکیده',95,6,5,6,0],
+  ['f43','پنیر',300,20,2,24,0,0,30],['f44','دوغ',35,2,3,1.5,0],
+  ['f45','سیب',52,0.3,14,0.2,2.4,0,150],['f46','پرتقال',47,0.9,12,0.1,2.4,0,150],
+  ['f47','موز',89,1.1,23,0.3,2.6,0,120],['f48','خیار',15,0.7,3.6,0.1,0.5,0,100],
+  ['f49','گوجه',18,0.9,3.9,0.2,1.2,0,100],['f50','خرما',282,2.5,75,0.4,8,0,10],
+  ['f51','گردو',654,15,14,65,7],['f52','بادام',579,21,22,50,12],
+  ['f53','پسته',562,20,28,45,10],['f54','ماکارونی پخته',158,5.8,31,0.9,1.8],
+  ['f55','لازانیا',135,7,12,6,1.5,1],['f56','پیتزا',266,11,33,10,2.5,0,0,120],
+  ['f57','همبرگر',250,13,20,13,2,0,180],['f58','سیب‌زمینی سرخ‌کرده',320,3.5,38,17,3.5],
+  ['f59','بستنی',207,3.5,24,11,0.7],['f60','کیک',350,5,50,15,1.5,0,0,80],
+  ['f61','شیرینی خشک',420,5,55,22,2,0,30],['f62','شکلات',546,5,60,31,7,0,20],
+  ['f63','عسل',304,0.3,82,0,0.2],['f64','کره',717,0.9,0.1,81,0],
+  ['f65','روغن زیتون',884,0,0,100,0],['f66','چیپس',536,7,53,35,4],
+  ['f67','نوشابه',42,0,10.6,0,0],['f68','آبمیوه طبیعی',50,0.5,12,0.2,0.5]
+];
+const FOODS = FOOD_ROWS.map((r) => ({
+  id: r[0], name: r[1], kcal: r[2], p: r[3], c: r[4], f: r[5], fib: r[6],
+  est: !!r[7], piece_g: r[8] || 0, slice_g: r[9] || 0
+}));
+function allFoods() {
+  return FOODS.concat(store.get('custom_foods', [])).concat(store.get('recipes', []));
+}
+function findFood(id) { return allFoods().find((x) => x.id === id); }
+
+// ---------- profile math ----------
+function getProfile() { return store.get('profile', null); }
+function bmrOf(p) {
+  return p.sex === 'm'
+    ? 10 * p.weight + 6.25 * p.height - 5 * p.age + 5
+    : 10 * p.weight + 6.25 * p.height - 5 * p.age - 161;
+}
+function frameOf(p) {
+  if (p.sex === 'f') return p.wrist < 14 ? 'ریز' : p.wrist <= 16 ? 'متوسط' : 'درشت';
+  return p.wrist < 16 ? 'ریز' : p.wrist <= 18 ? 'متوسط' : 'درشت';
+}
+function tdeeOf(p) { const a = ACTS.find((x) => x.id === p.activity); return bmrOf(p) * (a ? a.f : 1.2); }
+function targetOf(p) {
+  const t = tdeeOf(p);
+  const adj = p.goalAdj != null ? +p.goalAdj : 300;
+  if (p.goal === 'lose') return Math.max(1200, t - adj);
+  if (p.goal === 'gain') return t + adj;
+  return t;
+}
+
+// ---------- Persian text normalization ----------
+function faNorm(s) {
+  return String(s || '')
+    .replace(/ي/g, 'ی').replace(/ك/g, 'ک').replace(/ة/g, 'ه')
+    .replace(/[ً-ٟ]/g, '')
+    .replace(/[٠-٩]/g, (d) => '٠١٢٣٤٥٦٧٨٩'.indexOf(d))
+    .replace(/[۰-۹]/g, (d) => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d))
+    .replace(/‌/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+const NUMW = {
+  'یک':1,'یه':1,'دو':2,'سه':3,'چهار':4,'پنج':5,'شش':6,'هفت':7,'هشت':8,'نه':9,'ده':10,
+  'یازده':11,'دوازده':12,'سیزده':13,'چارده':14,'چهارده':14,'پانزده':15,'پونزده':15,
+  'شانزده':16,'شونزده':16,'هفده':17,'هیفده':17,'هجده':18,'هیجده':18,'نوزده':19,
+  'بیست':20,'سی':30,'چهل':40,'پنجاه':50,'پنجه':50,'شصت':60,'هفتاد':70,'هشتاد':80,
+  'نود':90,'صد':100,'یکصد':100,'دویست':200,'سیصد':300
+};
+function extractNumber(tokens) {
+  for (let i = 0; i < tokens.length; i++) {
+    const t = tokens[i];
+    if (/^\d+(\.\d+)?$/.test(t)) return { value: parseFloat(t), idx: [i] };
+    if (NUMW[t] != null) {
+      let v = NUMW[t]; const idx = [i];
+      if (tokens[i+1] === 'و' && NUMW[tokens[i+2]] != null) { v += NUMW[tokens[i+2]]; idx.push(i+1, i+2); }
+      return { value: v, idx };
+    }
+  }
+  return { value: null, idx: [] };
+}
+function matchFood(query) {
+  const q = faNorm(query);
+  if (!q) return null;
+  const qc = q.replace(/ /g, '');
+  let best = null, bestScore = 0;
+  for (const f of allFoods()) {
+    const n = faNorm(f.name);
+    const nc = n.replace(/ /g, '');
+    let score = 0;
+    if (nc === qc) score = 100;
+    else if (nc.includes(qc) || qc.includes(nc)) score = 70;
+    else {
+      const qt = q.split(' ').filter((w) => w.length > 1);
+      const nt = n.split(' ').filter((w) => w.length > 1);
+      let hit = 0;
+      for (const w of qt) if (nt.some((t) => t.startsWith(w) || w.startsWith(t))) hit++;
+      if (hit > 0) score = hit * 15;
+    }
+    if (score > bestScore) { bestScore = score; best = f; }
+  }
+  return best ? { food: best, score: bestScore } : null;
+}
+function defaultMeal() {
+  const h = new Date().getHours();
+  return h < 10 ? 'breakfast' : h < 15 ? 'lunch' : h < 21 ? 'dinner' : 'snack';
+}
+function parseSmart(raw) {
+  let s = ' ' + faNorm(raw) + ' ';
+  let meal = null;
+  const mealMap = [['صبحانه','صبحونه','breakfast'],['ناهار','نهار','lunch'],['شام','','dinner'],['میان وعده','عصرانه','snack']];
+  for (const [a, b, id] of mealMap) {
+    if (s.includes(' ' + a + ' ') || (b && s.includes(' ' + b + ' '))) {
+      meal = id;
+      s = s.split(' ' + a + ' ').join(' ');
+      if (b) s = s.split(' ' + b + ' ').join(' ');
+      break;
+    }
+  }
+  if (!meal) meal = defaultMeal();
+  let unit = 'g';
+  const unitMap = [['قاشق چایخوری','tsp'],['قاشق چایی','tsp'],['قاشق','tbsp'],['کفگیر','ladle'],
+    ['پیمانه','cup'],['پیمونه','cup'],['لیوان','glass'],['کاسه','bowl'],
+    ['عدد','piece'],['دانه','piece'],['برش','slice'],['تکه','slice'],['قاچ','slice'],['گرم','g']];
+  for (const [kw, id] of unitMap) {
+    if (s.includes(kw)) { unit = id; s = s.split(kw).join(' '); break; }
+  }
+  const tokens = s.trim().split(/\s+/).filter(Boolean);
+  const { value, idx } = extractNumber(tokens);
+  const rest = tokens.filter((_, i) => idx.indexOf(i) < 0).join(' ');
+  const q = rest.replace(/برای|خوردم|میخورم|بخورم|مقدار|یه|یک/g, ' ').replace(/\s+/g, ' ').trim();
+  const m = matchFood(q) || matchFood(rest);
+  return { meal, unit, amount: value, food: m ? m.food : null, query: q };
+}
+function gramsFor(food, unit, amount) {
+  const U = getUnits();
+  const a = amount == null ? (unit === 'g' ? 100 : 1) : amount;
+  if (unit === 'g') return a;
+  if (unit === 'piece') return food.piece_g ? a * food.piece_g : null;
+  if (unit === 'slice') return food.slice_g ? a * food.slice_g : null;
+  return a * (U[unit] || 0);
+}
+function macrosFor(food, grams) {
+  const k = grams / 100;
+  return { kcal: food.kcal * k, p: food.p * k, c: food.c * k, f: food.f * k, fib: food.fib * k };
+}
+
+// ---------- modal ----------
+function openModal(html) { $('#sheet').innerHTML = html; $('#modal').classList.remove('hidden'); }
+function closeModal() { $('#modal').classList.add('hidden'); $('#sheet').innerHTML = ''; }
+
+// ---------- diary state ----------
+const state = { date: todayStr(), view: 'diary' };
+const getDiary = () => store.get('diary', {});
+const saveDiary = (d) => store.set('diary', d);
+const dayEntries = (date) => getDiary()[date] || [];
+function addEntry(date, e) { const d = getDiary(); (d[date] = d[date] || []).push(e); saveDiary(d); }
+function delEntry(date, id) { const d = getDiary(); d[date] = (d[date] || []).filter((x) => x.id !== id); saveDiary(d); }
+function dayMacros(date) {
+  const t = { kcal: 0, p: 0, c: 0, f: 0, fib: 0 };
+  dayEntries(date).forEach((e) => { t.kcal += e.kcal; t.p += e.p; t.c += e.c; t.f += e.f; t.fib += e.fib; });
+  return t;
+}
+function dayExerciseKcal(date) {
+  return (store.get('exercise', {})[date] || []).reduce((s, x) => s + x.kcal, 0);
+}
+
+// ---------- diary render ----------
+function renderDiary() {
+  const p = getProfile();
+  const t = dayMacros(state.date);
+  const target = p ? targetOf(p) : 2000;
+  const burn = (p ? tdeeOf(p) : 2000) + dayExerciseKcal(state.date);
+  const net = t.kcal - burn;
+
+  $('#dateTitle').textContent = state.date === todayStr() ? 'امروز' : faDate(state.date);
+  $('#dateSub').textContent = state.date === todayStr() ? faDate(state.date) : '';
+
+  const C = 289, frac = Math.min(t.kcal / target, 1);
+  $('#ringFg').style.strokeDashoffset = C * (1 - frac);
+  $('#ringFg').style.stroke = t.kcal > target ? 'var(--orange)' : 'var(--green)';
+  $('#ringEaten').textContent = faNum(Math.round(t.kcal));
+  $('#ringTarget').textContent = faNum(Math.round(target));
+  $('#sumTarget').textContent = faNum(Math.round(target)) + ' کالری';
+  $('#sumBurn').textContent = faNum(Math.round(burn)) + ' کالری';
+  const netEl = $('#sumNet');
+  netEl.textContent = (net >= 0 ? '+' : '−') + faNum(Math.round(Math.abs(net))) + ' کالری';
+  netEl.style.color = net > 0 ? 'var(--red)' : 'var(--green-d)';
+
+  const mt = { p: target * 0.15 / 4, c: target * 0.55 / 4, f: target * 0.30 / 9, fib: 25 };
+  const bars = [['P', t.p, mt.p], ['C', t.c, mt.c], ['F', t.f, mt.f], ['Fib', t.fib, mt.fib]];
+  bars.forEach(([k, v, tg]) => {
+    $('#bar' + k).style.width = Math.min(v / tg * 100, 100) + '%';
+    $('#val' + k).textContent = faNum(round1(v)) + ' / ' + faNum(Math.round(tg)) + ' گ';
+  });
+
+  const host = $('#meals');
+  host.innerHTML = '';
+  MEALS.forEach((m) => {
+    const es = dayEntries(state.date).filter((e) => e.meal === m.id);
+    const ek = es.reduce((s, e) => s + e.kcal, 0);
+    const div = document.createElement('div');
+    div.className = 'card';
+    div.innerHTML =
+      '<div class="meal-head"><h3>' + m.icon + ' ' + m.name + '</h3>' +
+      '<span class="kcal">' + faNum(Math.round(ek)) + ' کالری</span></div>' +
+      '<div class="entries">' + (es.length ? '' : '<div class="empty">چیزی ثبت نشده</div>') + '</div>' +
+      '<button class="btn btn-ghost btn-block btn-sm add-food" data-meal="' + m.id + '">＋ افزودن غذا</button>';
+    const list = div.querySelector('.entries');
+    es.forEach((e) => {
+      const row = document.createElement('div');
+      row.className = 'entry';
+      row.innerHTML = '<span>' + esc(e.name) + ' <small style="color:var(--mut)">' + faNum(e.grams) + ' گ</small></span>' +
+        '<span><b>' + faNum(Math.round(e.kcal)) + '</b> <button class="edit" data-id="' + e.id + '" aria-label="ویرایش">✎</button><button class="del" data-id="' + e.id + '" aria-label="حذف">×</button></span>';
+      list.appendChild(row);
+    });
+    host.appendChild(div);
+  });
+  host.querySelectorAll('.add-food').forEach((b) => b.addEventListener('click', () => openFoodPicker(b.dataset.meal)));
+  host.querySelectorAll('.del').forEach((b) => b.addEventListener('click', () => {
+    if (confirm('این مورد حذف شود؟')) { delEntry(state.date, b.dataset.id); renderDiary(); }
+  }));
+  host.querySelectorAll('.edit').forEach((b) => b.addEventListener('click', () => editEntry(b.dataset.id)));
+}
+
+function editEntry(id) {
+  const d = getDiary();
+  const e = (d[state.date] || []).find((x) => x.id === id);
+  if (!e) return;
+  const food = findFood(e.foodId) || { name: e.name, kcal: 0, p: 0, c: 0, f: 0, fib: 0 };
+  openModal(
+    '<h2>ویرایش: ' + esc(e.name) + '</h2>' +
+    '<label>مقدار (گرم)</label><input id="eeGrams" type="number" inputmode="decimal" value="' + e.grams + '">' +
+    '<label>وعده</label><select id="eeMeal">' + MEALS.map((m) => '<option value="' + m.id + '"' + (m.id === e.meal ? ' selected' : '') + '>' + m.name + '</option>').join('') + '</select>' +
+    '<div class="row" style="margin-top:14px"><button class="btn btn-primary btn-block" id="eeSave">ذخیره</button>' +
+    '<button class="btn btn-block" id="eeCancel">انصراف</button></div>'
+  );
+  $('#eeCancel').addEventListener('click', closeModal);
+  $('#eeSave').addEventListener('click', () => {
+    const g = parseFloat($('#eeGrams').value) || 0;
+    if (g <= 0) { toast('مقدار معتبر نیست'); return; }
+    const mc = macrosFor(food, g);
+    e.grams = round1(g); e.meal = $('#eeMeal').value;
+    e.kcal = mc.kcal; e.p = mc.p; e.c = mc.c; e.f = mc.f; e.fib = mc.fib;
+    saveDiary(d); closeModal(); renderDiary(); toast('ذخیره شد');
+  });
+}
+
+// ---------- add food flow ----------
+function openFoodPicker(meal) {
+  openModal(
+    '<h2>انتخاب غذا — ' + mealName(meal) + '</h2>' +
+    '<input id="fpSearch" placeholder="جست‌وجو…">' +
+    '<div id="fpList" style="margin-top:8px"></div>'
+  );
+  const render = (q) => {
+    const list = $('#fpList');
+    const items = allFoods().filter((f) => !q || faNorm(f.name).includes(faNorm(q))).slice(0, 60);
+    list.innerHTML = items.length ? '' : '<div class="empty">غذایی پیدا نشد</div>';
+    items.forEach((f) => {
+      const el = document.createElement('div');
+      el.className = 'food-item';
+      el.innerHTML = '<span class="nm">' + esc(f.name) + (f.est ? '<span class="badge">مقادیر تخمینی</span>' : '') +
+        (f.custom ? '<span class="badge green">من</span>' : '') + '</span>' +
+        '<span class="meta">' + faNum(f.kcal) + ' کالری / ۱۰۰گ</span>';
+      el.addEventListener('click', () => openUnitForm(f, meal));
+      list.appendChild(el);
+    });
+  };
+  $('#fpSearch').addEventListener('input', (e) => render(e.target.value));
+  render('');
+  setTimeout(() => $('#fpSearch').focus(), 100);
+}
+
+function openUnitForm(food, meal) {
+  const U = getUnits();
+  openModal(
+    '<h2>' + esc(food.name) + '</h2>' +
+    '<div class="meta" style="color:var(--mut);font-size:.85rem">' + faNum(food.kcal) + ' کالری در هر ۱۰۰ گرم' + (food.est ? ' <span class="badge">مقادیر تخمینی</span>' : '') + '</div>' +
+    '<label>واحد</label><div class="unit-grid" id="ufUnits">' +
+    UNITS.map((u) => {
+      let hint = '';
+      if (u.id === 'piece') hint = food.piece_g ? ' (' + faNum(food.piece_g) + 'گ)' : ' (؟)';
+      if (u.id === 'slice') hint = food.slice_g ? ' (' + faNum(food.slice_g) + 'گ)' : ' (؟)';
+      else if (u.id !== 'g' && u.id !== 'piece' && u.id !== 'slice') hint = ' (' + faNum(U[u.id]) + 'گ)';
+      return '<button class="unit-btn' + (u.id === 'g' ? ' sel' : '') + '" data-u="' + u.id + '">' + u.name + hint + '</button>';
+    }).join('') + '</div>' +
+    '<label>تعداد / مقدار</label><input id="ufCount" type="number" inputmode="decimal" value="100">' +
+    '<div class="confirm-card" id="ufPreview"></div>' +
+    '<div class="row" style="margin-top:12px"><button class="btn btn-primary btn-block" id="ufSave">ثبت در ' + mealName(meal) + '</button>' +
+    '<button class="btn btn-block" id="ufBack">برگشت</button></div>'
+  );
+  let unit = 'g';
+  const upd = () => {
+    const cnt = parseFloat($('#ufCount').value) || 0;
+    const g = gramsFor(food, unit, cnt);
+    const pv = $('#ufPreview');
+    if (g == null || g <= 0) {
+      pv.innerHTML = 'برای واحد «' + unitName(unit) + '» وزن هر واحد این غذا مشخص نیست — مقدار را مستقیم به <b>گرم</b> وارد کن یا واحد دیگری انتخاب کن.';
+      return;
+    }
+    const mc = macrosFor(food, g);
+    pv.innerHTML = '⚖️ ' + faNum(round1(g)) + ' گرم ≈ <b>' + faNum(Math.round(mc.kcal)) + ' کالری</b>' +
+      '<br><small>پروتئین ' + faNum(round1(mc.p)) + 'گ • کربوهیدرات ' + faNum(round1(mc.c)) + 'گ • چربی ' + faNum(round1(mc.f)) + 'گ • فیبر ' + faNum(round1(mc.fib)) + 'گ</small>';
+  };
+  $$('#ufUnits .unit-btn').forEach((b) => b.addEventListener('click', () => {
+    $$('#ufUnits .unit-btn').forEach((x) => x.classList.remove('sel'));
+    b.classList.add('sel'); unit = b.dataset.u;
+    if (unit === 'g') $('#ufCount').value = 100; else $('#ufCount').value = 1;
+    upd();
+  }));
+  $('#ufCount').addEventListener('input', upd);
+  $('#ufBack').addEventListener('click', () => openFoodPicker(meal));
+  $('#ufSave').addEventListener('click', () => {
+    const cnt = parseFloat($('#ufCount').value) || 0;
+    const g = gramsFor(food, unit, cnt);
+    if (g == null || g <= 0) { toast('مقدار معتبر نیست'); return; }
+    saveFoodEntry(food, round1(g), meal);
+  });
+  upd();
+}
+
+function saveFoodEntry(food, grams, meal) {
+  const mc = macrosFor(food, grams);
+  addEntry(state.date, {
+    id: uid(), foodId: food.id, name: food.name, grams,
+    meal, kcal: mc.kcal, p: mc.p, c: mc.c, f: mc.f, fib: mc.fib
+  });
+  closeModal(); renderDiary();
+  toast('ثبت شد: ' + food.name);
+}
+
+// ---------- smart logging ----------
+function showSmartConfirm(parsed) {
+  const host = $('#smartResult');
+  if (!parsed.food) {
+    host.innerHTML = '<div class="confirm-card" style="border-color:var(--orange)">غذایی پیدا نشد. نام غذا را بررسی کن یا از جست‌وجوی «افزودن غذا» استفاده کن.<br><small>شنیده شد: ' + esc(parsed.query) + '</small></div>';
+    return;
+  }
+  let g = gramsFor(parsed.food, parsed.unit, parsed.amount);
+  const needsGrams = (g == null);
+  if (needsGrams) g = parsed.food.piece_g || parsed.food.slice_g || 100;
+  const mc0 = macrosFor(parsed.food, g);
+  host.innerHTML =
+    '<div class="confirm-card"><b>نتیجه تحلیل:</b><br>' +
+    '🍽️ ' + esc(parsed.food.name) + (parsed.food.est ? ' <span class="badge">مقادیر تخمینی</span>' : '') + '<br>' +
+    '<div class="row" style="margin:8px 0"><div style="flex:1"><label style="margin:0">گرم</label>' +
+    '<input id="scGrams" type="number" inputmode="decimal" value="' + round1(g) + '"></div>' +
+    '<div style="flex:1"><label style="margin:0">وعده</label><select id="scMeal">' +
+    MEALS.map((m) => '<option value="' + m.id + '"' + (m.id === parsed.meal ? ' selected' : '') + '>' + m.name + '</option>').join('') +
+    '</select></div></div>' +
+    '<div id="scKcal">≈ <b>' + faNum(Math.round(mc0.kcal)) + ' کالری</b></div>' +
+    (needsGrams ? '<div class="note">وزن هر «' + unitName(parsed.unit) + '» این غذا مشخص نبود؛ گرم را دستی تنظیم کن.</div>' : '') +
+    '<div class="row" style="margin-top:10px"><button class="btn btn-primary btn-block" id="scSave">تأیید و ثبت</button>' +
+    '<button class="btn btn-block" id="scCancel">انصراف</button></div></div>';
+  const updK = () => {
+    const gg = parseFloat($('#scGrams').value) || 0;
+    $('#scKcal').innerHTML = '≈ <b>' + faNum(Math.round(macrosFor(parsed.food, gg).kcal)) + ' کالری</b>';
+  };
+  $('#scGrams').addEventListener('input', updK);
+  $('#scCancel').addEventListener('click', () => { host.innerHTML = ''; });
+  $('#scSave').addEventListener('click', () => {
+    const gg = parseFloat($('#scGrams').value) || 0;
+    if (gg <= 0) { toast('مقدار معتبر نیست'); return; }
+    saveFoodEntry(parsed.food, round1(gg), $('#scMeal').value);
+    host.innerHTML = '';
+    $('#smartInput').value = '';
+  });
+}
+
+function initSmart() {
+  $('#smartParse').addEventListener('click', () => {
+    const v = $('#smartInput').value.trim();
+    if (!v) { toast('اول چیزی بنویس یا بگو'); return; }
+    showSmartConfirm(parseSmart(v));
+  });
+  $('#smartInput').addEventListener('keydown', (e) => { if (e.key === 'Enter') $('#smartParse').click(); });
+
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  const mic = $('#micBtn');
+  if (!SR) { mic.style.display = 'none'; return; }
+  const rec = new SR();
+  rec.lang = 'fa-IR';
+  rec.interimResults = false;
+  rec.maxAlternatives = 1;
+  mic.addEventListener('click', () => {
+    try {
+      mic.classList.add('listening');
+      rec.start();
+    } catch (e) { mic.classList.remove('listening'); }
+  });
+  rec.onresult = (e) => {
+    mic.classList.remove('listening');
+    const txt = e.results[0][0].transcript;
+    $('#smartInput').value = txt;
+    showSmartConfirm(parseSmart(txt));
+  };
+  rec.onerror = rec.onend = () => mic.classList.remove('listening');
+}
+
+// ---------- foods tab ----------
+function renderFoods() {
+  const q = faNorm($('#foodSearch').value || '');
+  const items = allFoods().filter((f) => !q || faNorm(f.name).includes(q));
+  $('#foodCount').textContent = faNum(items.length) + ' غذا';
+  const list = $('#foodList');
+  list.innerHTML = items.length ? '' : '<div class="empty">غذایی پیدا نشد</div>';
+  items.slice(0, 150).forEach((f) => {
+    const el = document.createElement('div');
+    el.className = 'food-item';
+    el.innerHTML = '<span class="nm">' + esc(f.name) +
+      (f.est ? '<span class="badge">مقادیر تخمینی</span>' : '') +
+      (f.custom ? '<span class="badge green">من</span>' : '') + '</span>' +
+      '<span class="meta">' + faNum(Math.round(f.kcal)) + ' کالری / ۱۰۰گ</span>';
+    el.addEventListener('click', () => {
+      openModal('<h2>' + esc(f.name) + '</h2>' +
+        '<div class="kv"><span>کالری / ۱۰۰ گرم</span><b>' + faNum(f.kcal) + '</b></div>' +
+        '<div class="kv"><span>پروتئین</span><b>' + faNum(f.p) + ' گ</b></div>' +
+        '<div class="kv"><span>کربوهیدرات</span><b>' + faNum(f.c) + ' گ</b></div>' +
+        '<div class="kv"><span>چربی</span><b>' + faNum(f.f) + ' گ</b></div>' +
+        '<div class="kv"><span>فیبر</span><b>' + faNum(f.fib) + ' گ</b></div>' +
+        (f.est ? '<div class="note">مقادیر تخمینی است (دستورپخت‌ها فرق می‌کند).</div>' : '') +
+        '<button class="btn btn-block" id="fdClose" style="margin-top:10px">بستن</button>');
+      $('#fdClose').addEventListener('click', closeModal);
+    });
+    list.appendChild(el);
+  });
+  const mine = store.get('custom_foods', []).concat(store.get('recipes', []));
+  const mh = $('#myFoods');
+  mh.innerHTML = mine.length ? '' : '<div class="empty">هنوز غذای شخصی نداری</div>';
+  mine.forEach((f) => {
+    const el = document.createElement('div');
+    el.className = 'entry';
+    el.innerHTML = '<span>' + esc(f.name) + (f.recipe ? '<span class="badge green">دستور</span>' : '<span class="badge green">دستی</span>') + '</span>' +
+      '<span><b>' + faNum(Math.round(f.kcal)) + '</b> <button class="del" aria-label="حذف">×</button></span>';
+    el.querySelector('.del').addEventListener('click', () => {
+      if (!confirm('«' + f.name + '» حذف شود؟')) return;
+      store.set('custom_foods', store.get('custom_foods', []).filter((x) => x.id !== f.id));
+      store.set('recipes', store.get('recipes', []).filter((x) => x.id !== f.id));
+      renderFoods();
+    });
+    mh.appendChild(el);
+  });
+}
+
+function openCustomFood() {
+  openModal('<h2>➕ غذای دستی</h2>' +
+    '<label>نام غذا</label><input id="cfName" placeholder="مثلاً خورش مخصوص من">' +
+    '<div class="grid2">' +
+    '<div><label>کالری / ۱۰۰گ</label><input id="cfK" type="number" inputmode="decimal"></div>' +
+    '<div><label>پروتئین (گ)</label><input id="cfP" type="number" inputmode="decimal"></div>' +
+    '<div><label>کربوهیدرات (گ)</label><input id="cfC" type="number" inputmode="decimal"></div>' +
+    '<div><label>چربی (گ)</label><input id="cfF" type="number" inputmode="decimal"></div></div>' +
+    '<label>فیبر / ۱۰۰گ</label><input id="cfFib" type="number" inputmode="decimal" value="0">' +
+    '<label>وزن هر عدد (گرم) — اختیاری</label><input id="cfPiece" type="number" inputmode="decimal" placeholder="مثلاً ۳۰">' +
+    '<div class="row" style="margin-top:12px"><button class="btn btn-primary btn-block" id="cfSave">ذخیره</button>' +
+    '<button class="btn btn-block" id="cfCancel">انصراف</button></div>');
+  $('#cfCancel').addEventListener('click', closeModal);
+  $('#cfSave').addEventListener('click', () => {
+    const name = $('#cfName').value.trim();
+    const kcal = parseFloat($('#cfK').value) || 0;
+    if (!name || kcal <= 0) { toast('نام و کالری لازم است'); return; }
+    const arr = store.get('custom_foods', []);
+    arr.push({ id: uid(), name, kcal, p: parseFloat($('#cfP').value) || 0, c: parseFloat($('#cfC').value) || 0,
+      f: parseFloat($('#cfF').value) || 0, fib: parseFloat($('#cfFib').value) || 0,
+      piece_g: parseFloat($('#cfPiece').value) || 0, slice_g: 0, custom: true });
+    store.set('custom_foods', arr);
+    closeModal(); renderFoods(); toast('ذخیره شد');
+  });
+}
+
+function openRecipe() {
+  let rows = [{ foodId: FOODS[0].id, grams: 100 }];
+  openModal('<h2>🍳 ساخت دستورپخت</h2>' +
+    '<label>نام دستور</label><input id="rcName" placeholder="مثلاً خورش مامان">' +
+    '<div id="rcRows"></div>' +
+    '<button class="btn btn-ghost btn-block btn-sm" id="rcAdd">＋ افزودن ماده</button>' +
+    '<div class="confirm-card" id="rcPrev"></div>' +
+    '<div class="row" style="margin-top:12px"><button class="btn btn-primary btn-block" id="rcSave">ذخیره دستور</button>' +
+    '<button class="btn btn-block" id="rcCancel">انصراف</button></div>');
+  const updPrev = () => {
+    const tot = { g: 0, kcal: 0, p: 0, c: 0, f: 0, fib: 0 };
+    rows.forEach((r) => {
+      const f = findFood(r.foodId);
+      if (!f || !(r.grams > 0)) return;
+      const k = r.grams / 100;
+      tot.g += r.grams; tot.kcal += f.kcal * k; tot.p += f.p * k; tot.c += f.c * k; tot.f += f.f * k; tot.fib += f.fib * k;
+    });
+    $('#rcPrev').innerHTML = tot.g > 0
+      ? 'مجموع: ' + faNum(Math.round(tot.g)) + ' گرم<br>در هر ۱۰۰ گرم: <b>' + faNum(Math.round(tot.kcal / tot.g * 100)) + ' کالری</b>' +
+        ' • پروتئین ' + faNum(round1(tot.p / tot.g * 100)) + 'گ • کربوهیدرات ' + faNum(round1(tot.c / tot.g * 100)) + 'گ' +
+        ' • چربی ' + faNum(round1(tot.f / tot.g * 100)) + 'گ • فیبر ' + faNum(round1(tot.fib / tot.g * 100)) + 'گ'
+      : 'ماده‌ای اضافه کن…';
+    return tot;
+  };
+  const renderRows = () => {
+    const host = $('#rcRows');
+    host.innerHTML = '';
+    rows.forEach((r, i) => {
+      const div = document.createElement('div');
+      div.className = 'row'; div.style.margin = '6px 0';
+      div.innerHTML = '<select data-i="' + i + '" class="rcf" style="flex:2">' +
+        allFoods().map((f) => '<option value="' + f.id + '"' + (f.id === r.foodId ? ' selected' : '') + '>' + esc(f.name) + '</option>').join('') +
+        '</select><input data-i="' + i + '" class="rcg" type="number" inputmode="decimal" style="flex:1" value="' + r.grams + '" placeholder="گرم">';
+      host.appendChild(div);
+    });
+    host.querySelectorAll('.rcf').forEach((s) => s.addEventListener('change', () => { rows[+s.dataset.i].foodId = s.value; updPrev(); }));
+    host.querySelectorAll('.rcg').forEach((inp) => inp.addEventListener('input', () => { rows[+inp.dataset.i].grams = parseFloat(inp.value) || 0; updPrev(); }));
+    updPrev();
+  };
+  $('#rcAdd').addEventListener('click', () => { rows.push({ foodId: FOODS[0].id, grams: 100 }); renderRows(); });
+  $('#rcCancel').addEventListener('click', closeModal);
+  $('#rcSave').addEventListener('click', () => {
+    const name = $('#rcName').value.trim();
+    const tot = updPrev();
+    if (!name || tot.g <= 0) { toast('نام و مواد لازم است'); return; }
+    const arr = store.get('recipes', []);
+    arr.push({ id: uid(), name, kcal: tot.kcal / tot.g * 100, p: tot.p / tot.g * 100, c: tot.c / tot.g * 100,
+      f: tot.f / tot.g * 100, fib: tot.fib / tot.g * 100, custom: true, recipe: true, est: true });
+    store.set('recipes', arr);
+    closeModal(); renderFoods(); toast('دستور ذخیره شد');
+  });
+  renderRows();
+}
+
+// ---------- exercise tab ----------
+function renderExercise() {
+  $('#exDate').textContent = '— ' + faDate(state.date);
+  const cat = $('#exCatalog');
+  cat.innerHTML = '';
+  EXERCISES.forEach((ex, i) => {
+    const row = document.createElement('div');
+    row.className = 'ex-item';
+    row.innerHTML = '<span style="flex:1">' + esc(ex.name) + ' <small style="color:var(--mut)">MET ' + faNum(ex.met) + '</small></span>' +
+      '<input type="number" inputmode="numeric" placeholder="دقیقه" aria-label="دقیقه">' +
+      '<button class="btn btn-ghost btn-sm">ثبت</button>';
+    row.querySelector('button').addEventListener('click', () => {
+      const min = parseFloat(row.querySelector('input').value);
+      if (!(min > 0)) { toast('دقیقه را وارد کن'); return; }
+      const p = getProfile();
+      const w = p ? p.weight : 70;
+      const kcal = ex.met * w * (min / 60);
+      const log = store.get('exercise', {});
+      (log[state.date] = log[state.date] || []).push({ id: uid(), name: ex.name, met: ex.met, minutes: min, kcal });
+      store.set('exercise', log);
+      renderExercise(); toast('ثبت شد');
+    });
+    cat.appendChild(row);
+  });
+  const items = (store.get('exercise', {})[state.date] || []);
+  const logEl = $('#exLog');
+  logEl.innerHTML = items.length ? '' : '<div class="empty">ورزشی ثبت نشده</div>';
+  items.forEach((it) => {
+    const r = document.createElement('div');
+    r.className = 'entry';
+    r.innerHTML = '<span>' + esc(it.name) + ' <small style="color:var(--mut)">' + faNum(it.minutes) + ' دقیقه</small></span>' +
+      '<span><b>' + faNum(Math.round(it.kcal)) + '</b> <button class="del" aria-label="حذف">×</button></span>';
+    r.querySelector('.del').addEventListener('click', () => {
+      const lg = store.get('exercise', {});
+      lg[state.date] = (lg[state.date] || []).filter((x) => x.id !== it.id);
+      store.set('exercise', lg);
+      renderExercise();
+    });
+    logEl.appendChild(r);
+  });
+  $('#exTotal').textContent = faNum(Math.round(dayExerciseKcal(state.date))) + ' کالری';
+}
+
+// ---------- weight tab ----------
+function drawChart() {
+  const cv = $('#weightChart');
+  const ctx = cv.getContext('2d');
+  const W = cv.width, H = cv.height;
+  ctx.clearRect(0, 0, W, H);
+  const ws = store.get('weight', []).slice().sort((a, b) => a.date < b.date ? -1 : 1).slice(-30);
+  if (ws.length < 2) {
+    ctx.fillStyle = '#8d6e63'; ctx.font = '16px sans-serif'; ctx.textAlign = 'center';
+    ctx.fillText('برای نمودار حداقل دو ثبت وزن لازم است', W / 2, H / 2);
+    return;
+  }
+  const vals = ws.map((w) => w.kg);
+  const min = Math.min.apply(null, vals) - 0.5, max = Math.max.apply(null, vals) + 0.5;
+  const X = (i) => 44 + i * (W - 64) / (ws.length - 1);
+  const Y = (v) => H - 24 - (v - min) / (max - min) * (H - 48);
+  ctx.strokeStyle = '#f0e2d4'; ctx.fillStyle = '#8d6e63'; ctx.font = '11px sans-serif'; ctx.textAlign = 'right';
+  for (let gI = 0; gI <= 4; gI++) {
+    const v = min + (max - min) * gI / 4, y = Y(v);
+    ctx.beginPath(); ctx.moveTo(44, y); ctx.lineTo(W - 20, y); ctx.stroke();
+    ctx.fillText(faNum(Math.round(v * 10) / 10), 40, y + 4);
+  }
+  ctx.strokeStyle = '#2e7d32'; ctx.lineWidth = 3; ctx.beginPath();
+  ws.forEach((w, i) => { const x = X(i), y = Y(w.kg); if (i) ctx.lineTo(x, y); else ctx.moveTo(x, y); });
+  ctx.stroke();
+  ws.forEach((w, i) => { ctx.fillStyle = '#ef6c00'; ctx.beginPath(); ctx.arc(X(i), Y(w.kg), 4.5, 0, 7); ctx.fill(); });
+}
+function weekAvg() {
+  const p = getProfile();
+  const t = p ? tdeeOf(p) : 2000;
+  let s = 0;
+  for (let i = 0; i < 7; i++) {
+    const d = shiftD(todayStr(), -i);
+    s += dayMacros(d).kcal - (t + dayExerciseKcal(d));
+  }
+  return s / 7;
+}
+function renderWeight() {
+  const ws = store.get('weight', []).slice().sort((a, b) => a.date < b.date ? 1 : -1);
+  const log = $('#weightLog');
+  log.innerHTML = ws.length ? '' : '<div class="empty">هنوز وزنی ثبت نشده</div>';
+  ws.slice(0, 10).forEach((w) => {
+    const r = document.createElement('div');
+    r.className = 'entry';
+    r.innerHTML = '<span>' + faDate(w.date) + '</span><span><b>' + faNum(w.kg) + ' کیلو</b> <button class="del" aria-label="حذف">×</button></span>';
+    r.querySelector('.del').addEventListener('click', () => {
+      store.set('weight', store.get('weight', []).filter((x) => x.date !== w.date));
+      renderWeight();
+    });
+    log.appendChild(r);
+  });
+  drawChart();
+  const avg = weekAvg();
+  const el = $('#weekAvg');
+  el.textContent = (avg >= 0 ? '+' : '−') + faNum(Math.round(Math.abs(avg))) + ' کالری';
+  el.style.color = avg > 0 ? 'var(--red)' : 'var(--green-d)';
+}
+function addWeight() {
+  const v = parseFloat($('#weightInput').value);
+  if (!(v > 20 && v < 400)) { toast('وزن معتبر نیست'); return; }
+  const ws = store.get('weight', []).filter((x) => x.date !== state.date);
+  ws.push({ date: state.date, kg: v });
+  store.set('weight', ws);
+  $('#weightInput').value = '';
+  renderWeight(); toast('ثبت شد');
+}
+
+// ---------- profile form (shared: wizard + settings) ----------
+function profileFormHTML(pfx, p) {
+  p = p || {};
+  const seg = (name, opts, cur) =>
+    '<div class="seg" id="' + pfx + name + '">' +
+    opts.map((o) => '<button type="button" data-v="' + o[0] + '"' + (cur === o[0] ? ' class="sel"' : '') + '>' + o[1] + '</button>').join('') + '</div>';
+  return '<label>سن</label><input id="' + pfx + 'age" type="number" inputmode="numeric" value="' + (p.age || '') + '" placeholder="مثلاً ۴۵">' +
+    '<label>جنسیت</label>' + seg('sex', [['f', 'زن'], ['m', 'مرد']], p.sex || 'f') +
+    '<label>قد (سانتی‌متر)</label><input id="' + pfx + 'height" type="number" inputmode="decimal" value="' + (p.height || '') + '">' +
+    '<label>وزن (کیلوگرم)</label><input id="' + pfx + 'weight" type="number" inputmode="decimal" value="' + (p.weight || '') + '">' +
+    '<label>دور مچ دست (سانتی‌متر)</label><input id="' + pfx + 'wrist" type="number" inputmode="decimal" value="' + (p.wrist || '') + '">' +
+    '<label>سطح فعالیت روزانه</label>' + seg('activity', ACTS.map((a) => [a.id, a.name]), p.activity || 'light') +
+    '<label>هدف</label>' + seg('goal', GOALS.map((g) => [g.id, g.name]), p.goal || 'maintain') +
+    '<label>میزان تغییر روزانه (کالری)</label><input id="' + pfx + 'goalAdj" type="number" inputmode="numeric" value="' + (p.goalAdj != null ? p.goalAdj : 300) + '">';
+}
+function wireSegBtns(root) {
+  root.querySelectorAll('.seg').forEach((sg) => {
+    sg.querySelectorAll('button').forEach((b) => b.addEventListener('click', () => {
+      sg.querySelectorAll('button').forEach((x) => x.classList.remove('sel'));
+      b.classList.add('sel');
+    }));
+  });
+}
+function segVal(pfx, name) { const b = document.querySelector('#' + pfx + name + ' .sel'); return b ? b.dataset.v : null; }
+function readProfile(pfx) {
+  const age = parseFloat($('#' + pfx + 'age').value), height = parseFloat($('#' + pfx + 'height').value),
+    weight = parseFloat($('#' + pfx + 'weight').value), wrist = parseFloat($('#' + pfx + 'wrist').value),
+    goalAdj = parseFloat($('#' + pfx + 'goalAdj').value);
+  const sex = segVal(pfx, 'sex'), activity = segVal(pfx, 'activity'), goal = segVal(pfx, 'goal');
+  if (!(age > 0 && height > 0 && weight > 0 && wrist > 0 && sex && activity && goal)) return null;
+  return { age, height, weight, wrist, sex, activity, goal, goalAdj: isNaN(goalAdj) ? 300 : goalAdj };
+}
+function showWizard() {
+  const w = document.createElement('div');
+  w.className = 'wizard'; w.id = 'wizard';
+  w.innerHTML = '<h2>👋 خوش آمدی!</h2>' +
+    '<p style="color:var(--mut);font-size:.9rem">برای محاسبه کالری روزانه‌ات، اول پروفایلت را کامل کن:</p>' +
+    '<div id="wizardForm">' + profileFormHTML('w', {}) + '</div>' +
+    '<button class="btn btn-primary btn-block" id="wizSave" style="margin-top:14px">شروع! 🚀</button>';
+  document.body.appendChild(w);
+  wireSegBtns(w);
+  $('#wizSave').addEventListener('click', () => {
+    const p = readProfile('w');
+    if (!p) { toast('همه فیلدها را کامل کن'); return; }
+    store.set('profile', p);
+    w.remove(); renderDiary(); toast('پروفایل ذخیره شد 🎉');
+  });
+}
+
+// ---------- settings tab ----------
+function renderSettings() {
+  const p = getProfile() || {};
+  const host = $('#profileForm');
+  host.innerHTML = profileFormHTML('s', p);
+  wireSegBtns(host);
+  renderProfileInfo();
+  const U = getUnits();
+  const ue = $('#unitEditor');
+  ue.innerHTML = '';
+  UNITS.forEach((u) => {
+    if (u.id === 'g') return;
+    const row = document.createElement('div');
+    row.className = 'set-row';
+    if (u.id === 'piece' || u.id === 'slice') {
+      row.innerHTML = '<span>' + u.name + '</span><small style="color:var(--mut)">از روی هر غذا</small>';
+    } else {
+      row.innerHTML = '<span>' + u.name + '</span><span><input type="number" inputmode="decimal" data-u="' + u.id + '" value="' + U[u.id] + '"> گرم</span>';
+    }
+    ue.appendChild(row);
+  });
+  ue.querySelectorAll('input').forEach((inp) => inp.addEventListener('change', () => {
+    const s = store.get('units', {});
+    s[inp.dataset.u] = parseFloat(inp.value) || UNITS.find((x) => x.id === inp.dataset.u).def;
+    store.set('units', s);
+    toast('ذخیره شد');
+  }));
+}
+function renderProfileInfo() {
+  const p = getProfile();
+  const host = $('#profileInfo');
+  if (!p) { host.innerHTML = ''; return; }
+  host.innerHTML =
+    '<div class="kv"><span>🔥 متابولیسم پایه (BMR)</span><b>' + faNum(Math.round(bmrOf(p))) + ' کالری</b></div>' +
+    '<div class="kv"><span>⚡ نیاز روزانه (TDEE)</span><b>' + faNum(Math.round(tdeeOf(p))) + ' کالری</b></div>' +
+    '<div class="kv"><span>🎯 هدف روزانه تو</span><b>' + faNum(Math.round(targetOf(p))) + ' کالری</b></div>' +
+    '<div class="kv"><span>🦴 قاب بدنی (از مچ دست)</span><b>' + frameOf(p) + '</b></div>';
+}
+function saveProfileSettings() {
+  const p = readProfile('s');
+  if (!p) { toast('همه فیلدها را کامل کن'); return; }
+  store.set('profile', p);
+  renderProfileInfo(); renderDiary(); toast('پروفایل ذخیره شد');
+}
+function exportData() {
+  const data = {};
+  ['profile', 'units', 'diary', 'exercise', 'weight', 'custom_foods', 'recipes'].forEach((k) => { data[k] = store.get(k, null); });
+  const blob = new Blob([JSON.stringify(data)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'daftar-calorie-backup.json';
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+  toast('فایل پشتیبان دانلود شد');
+}
+function importData(e) {
+  const f = e.target.files[0];
+  if (!f) return;
+  const r = new FileReader();
+  r.onload = () => {
+    try {
+      const d = JSON.parse(r.result);
+      ['profile', 'units', 'diary', 'exercise', 'weight', 'custom_foods', 'recipes'].forEach((k) => { if (d[k] !== undefined) store.set(k, d[k]); });
+      toast('بازیابی شد');
+      setTimeout(() => location.reload(), 800);
+    } catch (err) { toast('فایل معتبر نیست'); }
+  };
+  r.readAsText(f);
+  e.target.value = '';
+}
+function clearAll() {
+  if (!confirm('همه داده‌ها پاک شود؟ این عمل برگشت‌ناپذیر است!')) return;
+  ['profile', 'units', 'diary', 'exercise', 'weight', 'custom_foods', 'recipes'].forEach((k) => store.del(k));
+  location.reload();
+}
+
+// ---------- navigation ----------
+function showView(v) {
+  state.view = v;
+  $$('.view').forEach((s) => s.classList.add('hidden'));
+  $('#view-' + v).classList.remove('hidden');
+  $$('.tabbar button').forEach((b) => b.classList.toggle('active', b.dataset.v === v));
+  if (v === 'diary') renderDiary();
+  if (v === 'foods') renderFoods();
+  if (v === 'exercise') renderExercise();
+  if (v === 'weight') renderWeight();
+  if (v === 'settings') renderSettings();
+  window.scrollTo(0, 0);
+}
+
+// ---------- init ----------
+function init() {
+  $$('.tabbar button').forEach((b) => b.addEventListener('click', () => showView(b.dataset.v)));
+  $('#modal').addEventListener('click', (e) => { if (e.target.id === 'modal') closeModal(); });
+  $('#datePrev').addEventListener('click', () => { state.date = shiftD(state.date, -1); renderDiary(); });
+  $('#dateNext').addEventListener('click', () => {
+    if (state.date < todayStr()) { state.date = shiftD(state.date, 1); renderDiary(); }
+  });
+  initSmart();
+  $('#foodSearch').addEventListener('input', renderFoods);
+  $('#btnCustomFood').addEventListener('click', openCustomFood);
+  $('#btnRecipe').addEventListener('click', openRecipe);
+  $('#weightAdd').addEventListener('click', addWeight);
+  $('#weightInput').addEventListener('keydown', (e) => { if (e.key === 'Enter') addWeight(); });
+  $('#profileSave').addEventListener('click', saveProfileSettings);
+  $('#btnExport').addEventListener('click', exportData);
+  $('#btnImport').addEventListener('click', () => $('#importFile').click());
+  $('#importFile').addEventListener('change', importData);
+  $('#btnClear').addEventListener('click', clearAll);
+  if (!getProfile()) showWizard();
+  showView('diary');
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js').catch(() => {}); });
+  }
+}
+document.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>
