@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect x="16" y="16" width="480" height="480" rx="110" fill="#2e7d32"/>
+  <ellipse cx="256" cy="270" rx="150" ry="120" fill="#ffffff"/>
+  <ellipse cx="256" cy="270" rx="118" ry="92" fill="#fff3e0"/>
+  <circle cx="216" cy="250" r="34" fill="#ef6c00"/>
+  <circle cx="292" cy="240" r="26" fill="#43a047"/>
+  <circle cx="262" cy="300" r="30" fill="#c62828"/>
+  <path d="M150 150 q30 -34 60 0 q-30 20 -60 0" fill="#43a047"/>
+  <path d="M180 150 q6 -26 22 -30" stroke="#2e7d32" stroke-width="8" fill="none" stroke-linecap="round"/>
+  <text x="256" y="452" text-anchor="middle" font-size="52" font-weight="bold" fill="#ffffff" font-family="sans-serif">دفتر کالری</text>
+</svg>
