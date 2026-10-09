@@ -320,7 +320,8 @@ const UNITS = [
   { id: 'glass', name: 'لیوان',         def: 240 },
   { id: 'bowl',  name: 'کاسه',          def: 250 },
   { id: 'piece', name: 'عدد',           def: 0 },
-  { id: 'slice', name: 'برش',           def: 0 }
+  { id: 'slice', name: 'برش',           def: 0 },
+  { id: 'palm',  name: 'کف دست',        def: 0 }
 ];
 const unitName = (id) => (UNITS.find((u) => u.id === id) || {}).name || id;
 function getUnits() {
@@ -335,7 +336,12 @@ const EXERCISES = [
   { name: 'دوچرخه‌سواری', met: 7 }, { name: 'فوتبال', met: 7 },
   { name: 'والیبال', met: 4 }, { name: 'بدنسازی', met: 5 },
   { name: 'یوگا', met: 3 }, { name: 'رقص', met: 4.5 },
-  { name: 'کار خانه', met: 3.5 }, { name: 'باغبانی', met: 4 }
+  { name: 'کار خانه', met: 3.5 }, { name: 'باغبانی', met: 4 },
+  { name: 'جارو کردن', met: 3.3 }, { name: 'جاروبرقی کشیدن', met: 3.3 },
+  { name: 'تی کشیدن کف', met: 3.5 }, { name: 'گردگیری', met: 2.5 },
+  { name: 'ظرف شستن', met: 2.3 }, { name: 'آشپزی', met: 2.5 },
+  { name: 'اتو کردن', met: 2.3 }, { name: 'لباس شستن و آویزان کردن', met: 3 },
+  { name: 'مرتب کردن خانه', met: 3 }, { name: 'خرید و حمل خرید', met: 3.5 }
 ];
 
 // ---------- food database (per 100g; est:true = مقادیر تخمینی) ----------
@@ -358,9 +364,9 @@ const FOOD_ROWS = [
   ['f29','پیراشکی',230,7,22,12,1.5,0,90],['f30','جوجه‌کباب',165,24,1,6,0,1],
   ['f31','کباب کوبیده',220,18,2,16,0,1],['f32','مرغ سرخ‌شده',210,22,3,12,0],
   ['f33','ماهی سرخ‌شده',190,20,2,11,0],['f34','کله‌پاچه',150,12,1,11,0],
-  ['f35','تخم‌مرغ آب‌پز',155,13,1,11,0,0,50],['f36','نان بربری',265,9,55,1.5,3,0,100],
-  ['f37','نان سنگک',260,9,54,1.5,4,0,90],['f38','نان لواش',270,9,56,1.2,2.5,0,40],
-  ['f39','نان تافتون',265,9,55,1.3,3,0,70],['f40','شیر',60,3.2,4.8,3.5,0],
+  ['f35','تخم‌مرغ آب‌پز',155,13,1,11,0,0,50],['f36','نان بربری',265,9,55,1.5,3,0,100,35],
+  ['f37','نان سنگک',260,9,54,1.5,4,0,90,30],['f38','نان لواش',270,9,56,1.2,2.5,0,40,25],
+  ['f39','نان تافتون',265,9,55,1.3,3,0,70,25],['f40','شیر',60,3.2,4.8,3.5,0],
   ['f41','ماست',60,3.5,4.5,3.3,0],['f42','ماست چکیده',95,6,5,6,0],
   ['f43','پنیر',300,20,2,24,0,0,30],['f44','دوغ',35,2,3,1.5,0],
   ['f45','سیب',52,0.3,14,0.2,2.4,0,150],['f46','پرتقال',47,0.9,12,0.1,2.4,0,150],
@@ -476,7 +482,7 @@ function parseSmart(raw) {
   if (!meal) meal = defaultMeal();
   let unit = 'g';
   const unitMap = [['قاشق چایخوری','tsp'],['قاشق چایی','tsp'],['قاشق','tbsp'],['کفگیر','ladle'],
-    ['پیمانه','cup'],['پیمونه','cup'],['لیوان','glass'],['کاسه','bowl'],
+    ['پیمانه','cup'],['پیمونه','cup'],['لیوان','glass'],['کاسه','bowl'],['کف دست','palm'],['کفدست','palm'],
     ['عدد','piece'],['دانه','piece'],['برش','slice'],['تکه','slice'],['قاچ','slice'],['گرم','g']];
   for (const [kw, id] of unitMap) {
     if (s.includes(kw)) { unit = id; s = s.split(kw).join(' '); break; }
@@ -493,7 +499,7 @@ function gramsFor(food, unit, amount) {
   const a = amount == null ? (unit === 'g' ? 100 : 1) : amount;
   if (unit === 'g') return a;
   if (unit === 'piece') return food.piece_g ? a * food.piece_g : null;
-  if (unit === 'slice') return food.slice_g ? a * food.slice_g : null;
+  if (unit === 'slice' || unit === 'palm') return food.slice_g ? a * food.slice_g : null;
   return a * (U[unit] || 0);
 }
 function macrosFor(food, grams) {
@@ -637,8 +643,8 @@ function openUnitForm(food, meal) {
     UNITS.map((u) => {
       let hint = '';
       if (u.id === 'piece') hint = food.piece_g ? ' (' + faNum(food.piece_g) + 'گ)' : ' (؟)';
-      if (u.id === 'slice') hint = food.slice_g ? ' (' + faNum(food.slice_g) + 'گ)' : ' (؟)';
-      else if (u.id !== 'g' && u.id !== 'piece' && u.id !== 'slice') hint = ' (' + faNum(U[u.id]) + 'گ)';
+      if (u.id === 'slice' || u.id === 'palm') hint = food.slice_g ? ' (' + faNum(food.slice_g) + 'گ)' : ' (؟)';
+      else if (u.id !== 'g' && u.id !== 'piece' && u.id !== 'slice' && u.id !== 'palm') hint = ' (' + faNum(U[u.id]) + 'گ)';
       return '<button class="unit-btn' + (u.id === 'g' ? ' sel' : '') + '" data-u="' + u.id + '">' + u.name + hint + '</button>';
     }).join('') + '</div>' +
     '<label>تعداد / مقدار</label><input id="ufCount" type="number" inputmode="decimal" value="100">' +
