@@ -741,21 +741,51 @@ function initSmart() {
   if (!SR) { mic.style.display = 'none'; return; }
   const rec = new SR();
   rec.lang = 'fa-IR';
-  rec.interimResults = false;
+  rec.interimResults = true;
   rec.maxAlternatives = 1;
+  let finalTxt = '';
   mic.addEventListener('click', () => {
     try {
+      finalTxt = '';
+      $('#smartInput').value = '';
       mic.classList.add('listening');
+      toast('🎙️ گوش می‌دهم... بگو');
       rec.start();
-    } catch (e) { mic.classList.remove('listening'); }
+    } catch (e) {
+      mic.classList.remove('listening');
+      toast('میکروفون مشغول است — کمی صبر کن و دوباره بزن');
+    }
   });
   rec.onresult = (e) => {
-    mic.classList.remove('listening');
-    const txt = e.results[0][0].transcript;
-    $('#smartInput').value = txt;
-    showSmartConfirm(parseSmart(txt));
+    let interim = '';
+    for (let i = e.resultIndex; i < e.results.length; i++) {
+      const t = e.results[i][0].transcript;
+      if (e.results[i].isFinal) finalTxt += t;
+      else interim += t;
+    }
+    $('#smartInput').value = (finalTxt + interim).trim();
   };
-  rec.onerror = rec.onend = () => mic.classList.remove('listening');
+  rec.onend = () => {
+    mic.classList.remove('listening');
+    const txt = (finalTxt || '').trim();
+    if (txt) {
+      $('#smartInput').value = txt;
+      showSmartConfirm(parseSmart(txt));
+    }
+  };
+  rec.onerror = (e) => {
+    mic.classList.remove('listening');
+    const err = (e && e.error) || '';
+    if (err === 'not-allowed' || err === 'service-not-allowed') {
+      toast('دسترسی میکروفون داده نشده — روی 🔒 کنار آدرس بزن و Microphone را Allow کن');
+    } else if (err === 'no-speech') {
+      toast('صدایی شنیده نشد — دوباره واضح بگو');
+    } else if (err === 'network') {
+      toast('تشخیص گفتار به اینترنت نیاز دارد');
+    } else if (err && err !== 'aborted') {
+      toast('خطای میکروفون: ' + err);
+    }
+  };
 }
 
 // ---------- foods tab ----------
