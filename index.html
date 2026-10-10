@@ -596,21 +596,27 @@ function parseSmart(raw) {
   for (const [kw, id] of unitMap) {
     if (s.includes(kw)) { unit = id; unitExplicit = true; s = s.split(kw).join(' '); break; }
   }
+  let sizeMult = 1, sizeWord = '';
+  const sizeMap = [['بزرگ',1.3],['درشت',1.3],['متوسط',1],['کوچک',0.7],['کوچیک',0.7],['ریزه',0.7],['ریز',0.7]];
+  for (const [kw, m] of sizeMap) {
+    if (s.includes(' ' + kw + ' ')) { sizeMult = m; sizeWord = kw; s = s.split(kw).join(' '); break; }
+  }
   const tokens = s.trim().split(/\s+/).filter(Boolean);
   const { value, idx } = extractNumber(tokens);
   const rest = tokens.filter((_, i) => idx.indexOf(i) < 0).join(' ');
   const q = rest.replace(/برای|خوردم|میخورم|بخورم|مقدار|یه|یک|نصف|نصفی/g, ' ').replace(/\s+/g, ' ').trim();
   const m = matchFood(q) || matchFood(rest);
-  return { meal, unit, unitExplicit, amount: value, food: m ? m.food : null, query: q };
+  return { meal, unit, unitExplicit, sizeMult, sizeWord, amount: value, food: m ? m.food : null, query: q };
 }
-function gramsFor(food, unit, amount, unitExplicit) {
+function gramsFor(food, unit, amount, unitExplicit, sizeMult) {
   const U = getUnits();
+  const sm = sizeMult || 1;
   // countable food with no explicit unit: bare counts (or no count at all) mean pieces, e.g. «نصف سیب»
   if (unit === 'g' && !unitExplicit && food.piece_g && (amount == null || amount <= 20))
-    return (amount == null ? 1 : amount) * food.piece_g;
+    return (amount == null ? 1 : amount) * food.piece_g * sm;
   const a = amount == null ? (unit === 'g' ? 100 : 1) : amount;
   if (unit === 'g') return a;
-  if (unit === 'piece') return food.piece_g ? a * food.piece_g : null;
+  if (unit === 'piece') return food.piece_g ? a * food.piece_g * sm : null;
   if (unit === 'slice' || unit === 'palm') return food.slice_g ? a * food.slice_g : null;
   return a * (U[unit] || 0);
 }
@@ -808,12 +814,16 @@ function saveFoodEntry(food, grams, meal) {
 function interpText(p, g) {
   if (!p.food) return '';
   const amt = p.amount;
-  if (amt != null && p.unit === 'g' && !p.unitExplicit && p.food.piece_g && amt <= 20)
-    return '🔍 تفسیر: ' + faNum(amt) + ' × عدد (' + esc(p.food.name) + ' ≈ ' + faNum(p.food.piece_g) + ' گرم) = ' + faNum(round1(g)) + ' گرم';
+  const sm = p.sizeMult || 1;
+  const fname = esc(p.food.name) + (p.sizeWord ? ' ' + esc(p.sizeWord) : '');
+  const pieceInfo = p.food.piece_g ? ' (' + fname + ' ≈ ' + faNum(round1(p.food.piece_g * sm)) + ' گرم)' : '';
+  const isPiece = p.food.piece_g && (p.unit === 'piece' || (p.unit === 'g' && !p.unitExplicit && amt != null && amt <= 20));
+  if (amt != null && isPiece)
+    return '🔍 تفسیر: ' + faNum(amt) + ' × عدد' + pieceInfo + ' = ' + faNum(round1(g)) + ' گرم';
   if (amt != null)
     return '🔍 تفسیر: ' + faNum(amt) + ' × ' + unitName(p.unit) + ' = ' + faNum(round1(g)) + ' گرم';
   if (p.unit === 'g' && !p.unitExplicit && p.food.piece_g)
-    return '🔍 تفسیر: مقداری گفته نشد — پیش‌فرض ۱ عدد = ' + faNum(round1(g)) + ' گرم';
+    return '🔍 تفسیر: مقداری گفته نشد — پیش‌فرض ۱ عدد' + pieceInfo + ' = ' + faNum(round1(g)) + ' گرم';
   return '🔍 تفسیر: مقداری گفته نشد — پیش‌فرض ' + faNum(round1(g)) + ' گرم';
 }
 // ---------- smart logging ----------
@@ -823,7 +833,7 @@ function showSmartConfirm(parsed) {
     host.innerHTML = '<div class="confirm-card" style="border-color:var(--orange)">غذایی پیدا نشد. نام غذا را بررسی کن یا از جست‌وجوی «افزودن غذا» استفاده کن.<br><small>شنیده شد: ' + esc(parsed.query) + '</small></div>';
     return;
   }
-  let g = gramsFor(parsed.food, parsed.unit, parsed.amount, parsed.unitExplicit);
+  let g = gramsFor(parsed.food, parsed.unit, parsed.amount, parsed.unitExplicit, parsed.sizeMult);
   const needsGrams = (g == null);
   if (needsGrams) g = parsed.food.piece_g || parsed.food.slice_g || 100;
   const mc0 = macrosFor(parsed.food, g);
@@ -880,7 +890,7 @@ function showSmartConfirmMaybeMulti(raw) {
 function showMultiConfirm(ps, raw) {
   const host = $('#smartResult');
   const items = ps.map((p) => {
-    let g = gramsFor(p.food, p.unit, p.amount, p.unitExplicit);
+    let g = gramsFor(p.food, p.unit, p.amount, p.unitExplicit, p.sizeMult);
     if (g == null) g = p.food.piece_g || p.food.slice_g || 100;
     return { p, g: round1(g) };
   });
