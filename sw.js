@@ -1,5 +1,5 @@
 // Service worker: cache-first for offline use
-const CACHE = 'daftar-calorie-v3';
+const CACHE = 'daftar-calorie-v4';
 const ASSETS = ['./', './index.html', './manifest.json', './icon.svg'];
 
 self.addEventListener('install', (e) => {
