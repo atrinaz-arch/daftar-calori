@@ -526,6 +526,14 @@ function extractNumber(tokens) {
   for (let i = 0; i < tokens.length; i++) {
     const t = tokens[i];
     if (/^\d+(\.\d+)?$/.test(t)) return { value: parseFloat(t), idx: [i] };
+    if (t === 'نصف' || t === 'نصفی' || t === 'نصفیه') {
+      const nxt = tokens[i+1]; const idx = [i]; let mult = 1;
+      if (nxt != null) {
+        if (/^\d+(\.\d+)?$/.test(nxt)) { mult = parseFloat(nxt); idx.push(i+1); }
+        else if (NUMW[nxt] != null) { mult = NUMW[nxt]; idx.push(i+1); }
+      }
+      return { value: 0.5 * mult, idx };
+    }
     if (NUMW[t] != null) {
       let v = NUMW[t]; const idx = [i];
       if (tokens[i+1] === 'و' && NUMW[tokens[i+2]] != null) { v += NUMW[tokens[i+2]]; idx.push(i+1, i+2); }
@@ -573,23 +581,25 @@ function parseSmart(raw) {
     }
   }
   if (!meal) meal = defaultMeal();
-  let unit = 'g';
+  let unit = 'g', unitExplicit = false;
   const unitMap = [['قاشق چایخوری','tsp'],['قاشق چای خوری','tsp'],['قاشق چایی','tsp'],['قاشق','tbsp'],['کفگیر','ladle'],
     ['پیمانه','cup'],['پیمونه','cup'],['لیوان','glass'],['کاسه','bowl'],['کف دست','palm'],['کفدست','palm'],
     ['عدد','piece'],['دانه','piece'],['برش','slice'],['تکه','slice'],['قاچ','slice'],['گرم','g']];
   for (const [kw, id] of unitMap) {
-    if (s.includes(kw)) { unit = id; s = s.split(kw).join(' '); break; }
+    if (s.includes(kw)) { unit = id; unitExplicit = true; s = s.split(kw).join(' '); break; }
   }
   const tokens = s.trim().split(/\s+/).filter(Boolean);
   const { value, idx } = extractNumber(tokens);
   const rest = tokens.filter((_, i) => idx.indexOf(i) < 0).join(' ');
-  const q = rest.replace(/برای|خوردم|میخورم|بخورم|مقدار|یه|یک/g, ' ').replace(/\s+/g, ' ').trim();
+  const q = rest.replace(/برای|خوردم|میخورم|بخورم|مقدار|یه|یک|نصف|نصفی/g, ' ').replace(/\s+/g, ' ').trim();
   const m = matchFood(q) || matchFood(rest);
-  return { meal, unit, amount: value, food: m ? m.food : null, query: q };
+  return { meal, unit, unitExplicit, amount: value, food: m ? m.food : null, query: q };
 }
-function gramsFor(food, unit, amount) {
+function gramsFor(food, unit, amount, unitExplicit) {
   const U = getUnits();
   const a = amount == null ? (unit === 'g' ? 100 : 1) : amount;
+  // bare count with no explicit unit on a countable food → pieces (e.g. «نصف سیب» = half an apple)
+  if (unit === 'g' && !unitExplicit && amount != null && amount <= 20 && food.piece_g) return a * food.piece_g;
   if (unit === 'g') return a;
   if (unit === 'piece') return food.piece_g ? a * food.piece_g : null;
   if (unit === 'slice' || unit === 'palm') return food.slice_g ? a * food.slice_g : null;
@@ -792,7 +802,7 @@ function showSmartConfirm(parsed) {
     host.innerHTML = '<div class="confirm-card" style="border-color:var(--orange)">غذایی پیدا نشد. نام غذا را بررسی کن یا از جست‌وجوی «افزودن غذا» استفاده کن.<br><small>شنیده شد: ' + esc(parsed.query) + '</small></div>';
     return;
   }
-  let g = gramsFor(parsed.food, parsed.unit, parsed.amount);
+  let g = gramsFor(parsed.food, parsed.unit, parsed.amount, parsed.unitExplicit);
   const needsGrams = (g == null);
   if (needsGrams) g = parsed.food.piece_g || parsed.food.slice_g || 100;
   const mc0 = macrosFor(parsed.food, g);
@@ -851,7 +861,7 @@ function showSmartConfirmMaybeMulti(raw) {
 function showMultiConfirm(ps, raw) {
   const host = $('#smartResult');
   const items = ps.map((p) => {
-    let g = gramsFor(p.food, p.unit, p.amount);
+    let g = gramsFor(p.food, p.unit, p.amount, p.unitExplicit);
     if (g == null) g = p.food.piece_g || p.food.slice_g || 100;
     return { p, g: round1(g) };
   });
