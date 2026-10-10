@@ -577,6 +577,7 @@ function defaultMeal() {
 }
 function parseSmart(raw) {
   let s = ' ' + faNorm(raw) + ' ';
+  s = s.replace(/یهدوم|یکدوم/g, 'یک دوم');
   let meal = null;
   const mealMap = [['صبحانه','صبحونه','breakfast'],['ناهار','نهار','lunch'],['شام','','dinner'],['میان وعده','عصرانه','snack']];
   for (const [a, b, id] of mealMap) {
@@ -604,9 +605,10 @@ function parseSmart(raw) {
 }
 function gramsFor(food, unit, amount, unitExplicit) {
   const U = getUnits();
+  // countable food with no explicit unit: bare counts (or no count at all) mean pieces, e.g. «نصف سیب»
+  if (unit === 'g' && !unitExplicit && food.piece_g && (amount == null || amount <= 20))
+    return (amount == null ? 1 : amount) * food.piece_g;
   const a = amount == null ? (unit === 'g' ? 100 : 1) : amount;
-  // bare count with no explicit unit on a countable food → pieces (e.g. «نصف سیب» = half an apple)
-  if (unit === 'g' && !unitExplicit && amount != null && amount <= 20 && food.piece_g) return a * food.piece_g;
   if (unit === 'g') return a;
   if (unit === 'piece') return food.piece_g ? a * food.piece_g : null;
   if (unit === 'slice' || unit === 'palm') return food.slice_g ? a * food.slice_g : null;
@@ -802,6 +804,18 @@ function saveFoodEntry(food, grams, meal) {
   toast('ثبت شد: ' + food.name);
 }
 
+// always-visible explanation of what the parser understood, so the user can verify it
+function interpText(p, g) {
+  if (!p.food) return '';
+  const amt = p.amount;
+  if (amt != null && p.unit === 'g' && !p.unitExplicit && p.food.piece_g && amt <= 20)
+    return '🔍 تفسیر: ' + faNum(amt) + ' × عدد (' + esc(p.food.name) + ' ≈ ' + faNum(p.food.piece_g) + ' گرم) = ' + faNum(round1(g)) + ' گرم';
+  if (amt != null)
+    return '🔍 تفسیر: ' + faNum(amt) + ' × ' + unitName(p.unit) + ' = ' + faNum(round1(g)) + ' گرم';
+  if (p.unit === 'g' && !p.unitExplicit && p.food.piece_g)
+    return '🔍 تفسیر: مقداری گفته نشد — پیش‌فرض ۱ عدد = ' + faNum(round1(g)) + ' گرم';
+  return '🔍 تفسیر: مقداری گفته نشد — پیش‌فرض ' + faNum(round1(g)) + ' گرم';
+}
 // ---------- smart logging ----------
 function showSmartConfirm(parsed) {
   const host = $('#smartResult');
@@ -814,9 +828,7 @@ function showSmartConfirm(parsed) {
   if (needsGrams) g = parsed.food.piece_g || parsed.food.slice_g || 100;
   const mc0 = macrosFor(parsed.food, g);
   const heardLine = '<small>🎙️ شنیده شد: «' + esc(parsed.query) + '»</small><br>';
-  const interpLine = !needsGrams && parsed.amount != null
-    ? '🔍 تفسیر: ' + faNum(parsed.amount) + ' × ' + unitName(parsed.unit) + ' = ' + faNum(round1(g)) + ' گرم<br>'
-    : '';
+  const interpLine = interpText(parsed, g) + '<br>';
   host.innerHTML =
     '<div class="confirm-card"><b>نتیجه تحلیل:</b><br>' + heardLine + interpLine +
     '🍽️ ' + esc(parsed.food.name) + (parsed.food.est ? ' <span class="badge">مقادیر تخمینی</span>' : '') + '<br>' +
@@ -877,7 +889,7 @@ function showMultiConfirm(ps, raw) {
   const rowsHtml = items.map((it, i) =>
     '<div class="kv"><span>🍽️ ' + esc(it.p.food.name) +
     (it.p.food.est ? ' <span class="badge">مقادیر تخمینی</span>' : '') +
-    '<br><small style="color:var(--mut)">🔍 ' + esc(it.p.query) + '</small></span>' +
+    '<br><small style="color:var(--mut)">🎙️ ' + esc(it.p.query) + '<br>' + esc(interpText(it.p, it.g)) + '</small></span>' +
     '<span><input data-mi="' + i + '" class="mi-grams" type="number" inputmode="decimal" value="' + it.g +
     '" style="width:84px"> <small>گرم</small> <b data-mk="' + i + '">≈ ' +
     faNum(Math.round(macrosFor(it.p.food, it.g).kcal)) + '</b></span></div>'
